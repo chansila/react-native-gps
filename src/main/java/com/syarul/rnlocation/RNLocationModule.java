@@ -111,7 +111,7 @@ public class RNLocationModule extends ReactContextBaseJavaModule{
             locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 1, mLocationListener);
           }
           if(locationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER)){
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 1, mLocationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 1, mLocationListener);
           }
         }
 
