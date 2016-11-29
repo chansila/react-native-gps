@@ -21,7 +21,7 @@ public class RNLocationModule extends ReactContextBaseJavaModule{
     // React Class Name as called from JS
     public static final String REACT_CLASS = "RNLocation";
     // Unique Name for Log TAG
-    public static final String TAG = RNLocationModule.class.getSimpleName();
+    public static final String TAG = "StartLocationUpdate";
     // Save last Location Provided
     private Location mLastLocation;
     private LocationListener mLocationListener;
@@ -31,14 +31,14 @@ public class RNLocationModule extends ReactContextBaseJavaModule{
     ReactApplicationContext mReactContext;
 
 
-    // Constructor Method as called in Package
-    public RNLocationModule(ReactApplicationContext reactContext) {
-        super(reactContext);
-        // Save Context for later use
-        mReactContext = reactContext;
+        // Constructor Method as called in Package
+        public RNLocationModule(ReactApplicationContext reactContext) {
+          super(reactContext);
+          // Save Context for later use
+          mReactContext = reactContext;
 
-        locationManager = (LocationManager) mReactContext.getSystemService(Context.LOCATION_SERVICE);
-        mLastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+          locationManager = (LocationManager) mReactContext.getSystemService("location");
+          mLastLocation = locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         }
 
 
@@ -79,17 +79,16 @@ public class RNLocationModule extends ReactContextBaseJavaModule{
                     double longitude;
                     double latitude;
                     double speed;
-                    double altitude;
-                    float accuracy;
+                    double accuracy;
+                    String provider;
 
                     // Receive Longitude / Latitude from (updated) Last Location
                     longitude = mLastLocation.getLongitude();
                     latitude = mLastLocation.getLatitude();
                     speed = mLastLocation.getSpeed();
-                    altitude = mLastLocation.getAltitude();
                     accuracy = mLastLocation.getAccuracy();
-                    
-
+                    provider = mLastLocation.getProvider();
+                    Log.d(TAG, "accuracy of gps"+accuracy+" from provider "+provider);
                     Log.i(TAG, "Got new location. Lng: " +longitude+" Lat: "+latitude);
 
                    // Create Map with Parameters to send to JS
@@ -97,9 +96,7 @@ public class RNLocationModule extends ReactContextBaseJavaModule{
                     params.putDouble("longitude", longitude);
                     params.putDouble("latitude", latitude);
                     params.putDouble("speed", speed);
-                    params.putDouble("altitude", altitude);
-                    params.putFloat("accuracy", accuracy);
-                    
+                    params.putDouble("accuracy", accuracy);
 
                     // Send Event to JS to update Location
                     sendEvent(mReactContext, "locationUpdated", params);
@@ -108,11 +105,14 @@ public class RNLocationModule extends ReactContextBaseJavaModule{
                     Log.i(TAG, "Location services disconnected.");
                   }
               }
-
-
-        }};
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 500, 1, mLocationListener);
-
+            }
+          };
+          if (locationManager.getAllProviders().contains(LocationManager.NETWORK_PROVIDER)) {
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 1, mLocationListener);
+          }
+          if(locationManager.getAllProviders().contains(LocationManager.GPS_PROVIDER)){
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 1, mLocationListener);
+          }
         }
 
         /*
